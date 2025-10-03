@@ -1,6 +1,6 @@
 package com.internvision.internvision_restful_api_development.service;
 
-import com.internvision.internvision_restful_api_development.model.User;
+import com.internvision.internvision_restful_api_development.model.document.User;
 
 import java.util.List;
 

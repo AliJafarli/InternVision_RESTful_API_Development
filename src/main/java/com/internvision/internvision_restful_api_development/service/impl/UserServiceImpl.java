@@ -1,6 +1,9 @@
 package com.internvision.internvision_restful_api_development.service.impl;
 
-import com.internvision.internvision_restful_api_development.model.User;
+import com.internvision.internvision_restful_api_development.model.constants.ApiErrorMessage;
+import com.internvision.internvision_restful_api_development.model.document.User;
+import com.internvision.internvision_restful_api_development.model.exception.DataExistException;
+import com.internvision.internvision_restful_api_development.model.exception.NotFoundException;
 import com.internvision.internvision_restful_api_development.repository.UserRepository;
 import com.internvision.internvision_restful_api_development.service.UserService;
 import lombok.AllArgsConstructor;
@@ -22,18 +25,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserById(String id) {
         return userRepository.findById(id).orElseThrow(() ->
-                new RuntimeException("User not found with id: " + id));
+                new NotFoundException(ApiErrorMessage.USER_NOT_FOUND_BY_ID.getMessage(id)));
     }
 
     @Override
     public User saveUser(User user) {
 
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new RuntimeException("User already exists");
+            throw new DataExistException(ApiErrorMessage.EMAIL_ALREADY_EXISTS.getMessage(user.getEmail()));
         }
 
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            throw new RuntimeException("User already exists");
+            throw new DataExistException(ApiErrorMessage.USERNAME_ALREADY_EXISTS.getMessage(user.getUsername()));
         }
         return userRepository.save(user);
     }
@@ -41,7 +44,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateUser(User user) {
         User updatedUser = userRepository.findById(user.getId()).orElseThrow(() ->
-                new RuntimeException("User Not Found with id: " + user.getId()));
+                new NotFoundException(ApiErrorMessage.USER_NOT_FOUND_BY_ID.getMessage(user.getId())));
         updatedUser.setUsername(user.getUsername());
         return userRepository.save(updatedUser);
     }
@@ -49,7 +52,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(String id) {
         if (!userRepository.existsById(id)) {
-            throw new RuntimeException("User not found with id: " + id);
+            throw new NotFoundException(ApiErrorMessage.USER_NOT_FOUND_BY_ID.getMessage(id));
         }
 
         userRepository.deleteById(id);

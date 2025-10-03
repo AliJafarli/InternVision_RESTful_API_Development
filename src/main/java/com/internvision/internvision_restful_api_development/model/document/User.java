@@ -1,4 +1,4 @@
-package com.internvision.internvision_restful_api_development.model;
+package com.internvision.internvision_restful_api_development.model.document;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -24,4 +24,5 @@ public class User {
     @NotBlank(message = "Email is required")
     @Email(message = "Email should be valid")
     private String email;
+
 }
