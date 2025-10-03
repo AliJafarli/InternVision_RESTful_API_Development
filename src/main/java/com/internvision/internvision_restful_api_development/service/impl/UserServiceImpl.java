@@ -42,8 +42,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(User user) {
-        User updatedUser = userRepository.findById(user.getId()).orElseThrow(() ->
+    public User updateUser(String id, User user) {
+        User updatedUser = userRepository.findById(id).orElseThrow(() ->
                 new NotFoundException(ApiErrorMessage.USER_NOT_FOUND_BY_ID.getMessage(user.getId())));
         updatedUser.setUsername(user.getUsername());
         return userRepository.save(updatedUser);
