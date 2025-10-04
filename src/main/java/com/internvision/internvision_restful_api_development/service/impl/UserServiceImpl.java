@@ -46,6 +46,8 @@ public class UserServiceImpl implements UserService {
         User updatedUser = userRepository.findById(id).orElseThrow(() ->
                 new NotFoundException(ApiErrorMessage.USER_NOT_FOUND_BY_ID.getMessage(user.getId())));
         updatedUser.setUsername(user.getUsername());
+        updatedUser.setEmail(user.getEmail());
+        updatedUser.setPassword(user.getPassword());
         return userRepository.save(updatedUser);
     }
 
