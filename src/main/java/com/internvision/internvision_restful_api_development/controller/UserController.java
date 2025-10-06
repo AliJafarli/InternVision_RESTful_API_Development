@@ -1,4 +1,4 @@
-package com.internvision.internvision_restful_api_development.resource;
+package com.internvision.internvision_restful_api_development.controller;
 
 import com.internvision.internvision_restful_api_development.model.document.User;
 import com.internvision.internvision_restful_api_development.service.UserService;
@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("${end.points.users}")
-public class UserResource {
+public class UserController {
     private final UserService userService;
 
     @GetMapping("${end.points.all}")
