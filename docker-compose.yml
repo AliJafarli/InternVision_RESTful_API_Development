@@ -24,6 +24,8 @@ services:
       - "8080:8080"
     environment:
       SPRING_DATA_MONGODB_URI: mongodb://admin:secret@mongo:27017/usersdb?authSource=admin
+      JWT_SECRET: "f4g8l!Qw3E&9rYh2Uo%TkPz7z1@9Dd3A6k9J#uR4iV7sX0w2Mz8F&6O8kF5LbV"
+      JWT_EXP_MS: "14400000"
 
   mongo-express:
     image: mongo-express
