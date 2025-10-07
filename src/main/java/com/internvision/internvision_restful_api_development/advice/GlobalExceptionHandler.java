@@ -1,12 +1,15 @@
 package com.internvision.internvision_restful_api_development.advice;
 
 import com.internvision.internvision_restful_api_development.model.exception.DataExistException;
+import com.internvision.internvision_restful_api_development.model.exception.InvalidPasswordException;
 import com.internvision.internvision_restful_api_development.model.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
@@ -55,5 +58,18 @@ public class GlobalExceptionHandler {
         error.put("message", message);
         return new ResponseEntity<>(error, status);
     }
+    @ExceptionHandler(AuthenticationException.class)
+    protected ResponseEntity<String> handleAuthenticationException(AuthenticationException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidPasswordException.class)
+    @ResponseBody
+    public ResponseEntity<?> handleInvalidPasswordException(InvalidPasswordException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+
+
+
 }
 

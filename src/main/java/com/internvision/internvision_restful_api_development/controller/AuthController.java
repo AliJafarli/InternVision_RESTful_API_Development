@@ -6,6 +6,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -19,37 +21,39 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("${end.points.register}")
-    public String register(@Valid @RequestBody User user) {
+    public ResponseEntity<String> register(@Valid @RequestBody User user) {
         authService.register(user);
-        return "User registered successfully";
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body("User registered successfully");
     }
 
     @PostMapping("${end.points.login}")
-    public String login(
+    public ResponseEntity<String> login(
             @RequestParam @NotBlank String username,
             @RequestParam @NotBlank String password) {
-        return authService.login(username, password);
+        String token = authService.login(username, password);
+        return ResponseEntity.ok(token);
     }
 
     @PostMapping("${end.points.logout}")
-    public String logout(@RequestHeader("Authorization") @NotBlank String token) {
+    public ResponseEntity<String> logout(@RequestHeader("Authorization") @NotBlank String token) {
         authService.logout(token);
-        return "Logged out successfully";
+        return ResponseEntity.ok("Logout successful");
     }
 
     @PostMapping("${end.points.password.change}")
-    public String changePassword(Authentication authentication,
+    public ResponseEntity<String> changePassword(Authentication authentication,
                                  @RequestParam @NotBlank String oldPassword,
                                  @RequestParam @NotBlank String newPassword) {
         authService.changePassword(authentication.getName(), oldPassword, newPassword);
-        return "Password changed successfully";
+        return ResponseEntity.ok("Password changed successfully");
     }
 
     @PostMapping("${end.points.password.reset}")
-    public String resetPassword(
+    public ResponseEntity<String> resetPassword(
             @RequestParam @Email String email,
             @RequestParam @NotBlank String newPassword) {
         authService.resetPassword(email, newPassword);
-        return "Password reset successfully";
+        return ResponseEntity.ok("Password reset successfully");
     }
 }

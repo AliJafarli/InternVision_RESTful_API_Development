@@ -25,7 +25,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final RevokedTokenRepository revokedTokenRepository;
 
 
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
@@ -38,16 +37,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(header) && header.startsWith("Bearer ")) {
             token = header.substring(7);
         }
+        try {
+            if (token != null && jwtUtil.validateToken(token)
+                    && revokedTokenRepository.findByToken(token).isEmpty()) {
+                String username = jwtUtil.extractUsername(token);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                var auth = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            }
 
-        if (token != null && jwtUtil.validateToken(token)
-                && revokedTokenRepository.findByToken(token).isEmpty()) {
-            String username = jwtUtil.extractUsername(token);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            var auth = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(auth);
+            filterChain.doFilter(request, response);
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
+            throw new org.springframework.security.authentication.
+                    BadCredentialsException("Invalid or missing token", e);
         }
 
-        filterChain.doFilter(request, response);
     }
 }

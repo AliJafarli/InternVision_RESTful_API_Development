@@ -14,7 +14,7 @@ public enum ApiErrorMessage {
     EMAIL_ALREADY_EXISTS("Email: %s already exists" ),
 
     PASSWORD_INCORRECT("Password: %s is incorrect" ),
-    OLD_PASSWORD_INCORRECT("Old password: %s is incorrect" ),
+    OLD_PASSWORD_INCORRECT("Old password is incorrect" ),
     ;
     private final String message;
 
