@@ -10,6 +10,8 @@ import com.internvision.internvision_restful_api_development.repository.RevokedT
 import com.internvision.internvision_restful_api_development.repository.UserRepository;
 import com.internvision.internvision_restful_api_development.security.JwtUtil;
 import com.internvision.internvision_restful_api_development.service.AuthService;
+import io.jsonwebtoken.JwtException;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.Date;
 
+@Log4j2
 @Service
 public class AuthServiceImpl implements AuthService {
 
@@ -58,17 +61,38 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void logout(String bearerToken) {
-        if (bearerToken == null) return;
-        String token = bearerToken.startsWith("Bearer ") ? bearerToken.substring(7) : bearerToken;
-        Date exp = null;
-        try { exp = jwtUtil.extractExpiration(token); } catch (Exception ignored) {}
-        RevokedToken r = new RevokedToken();
-        r.setToken(token);
-        r.setRevokedAt(Instant.now());
-        r.setExpiresAt(exp);
-        revokedRepo.save(r);
+    public boolean logout(String bearerToken) {
+        if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+            log.warn("Logout attempt with missing or invalid Authorization header");
+            return false;
+        }
+
+        String token = bearerToken.substring(7);
+
+        try {
+            String username = jwtUtil.extractUsername(token);
+            Date expiration = jwtUtil.extractExpiration(token);
+
+            RevokedToken revoked = new RevokedToken();
+            revoked.setToken(token);
+            revoked.setRevokedAt(Instant.now());
+            revoked.setExpiresAt(expiration);
+
+            revokedRepo.save(revoked);
+
+            log.info("User '{}' logged out successfully. Token revoked until {}", username, expiration);
+            return true;
+
+        } catch (JwtException ex) {
+            log.warn("Failed to parse JWT during logout: {}", ex.getMessage());
+            return false;
+
+        } catch (Exception ex) {
+            log.error("Unexpected error during logout: {}", ex.getMessage(), ex);
+            return false;
+        }
     }
+
 
     @Override
     public void changePassword(String username, String oldPassword, String newPassword) {
