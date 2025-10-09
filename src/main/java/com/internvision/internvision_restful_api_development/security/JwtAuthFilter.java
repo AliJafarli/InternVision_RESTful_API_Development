@@ -37,22 +37,38 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(header) && header.startsWith("Bearer ")) {
             token = header.substring(7);
         }
+
+        if (token == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         try {
-            if (token != null && jwtUtil.validateToken(token)
+
+            if (jwtUtil.validateToken(token)
                     && revokedTokenRepository.findByToken(token).isEmpty()) {
+
                 String username = jwtUtil.extractUsername(token);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
                 var auth = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(auth);
+
+                filterChain.doFilter(request, response);
+            } else {
+
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\": \"Invalid or revoked token\"}");
             }
 
-            filterChain.doFilter(request, response);
         } catch (Exception e) {
-            SecurityContextHolder.clearContext();
-            throw new org.springframework.security.authentication.
-                    BadCredentialsException("Invalid or missing token", e);
-        }
 
+            SecurityContextHolder.clearContext();
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Invalid token format\"}");
+        }
     }
 }
