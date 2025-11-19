@@ -1,4 +1,4 @@
- A demo RESTful API
+Secure_User_Management_API
 
 This project is a RESTful backend service developed with Java and Spring Boot, implementing a user management system with secure authentication.
 
